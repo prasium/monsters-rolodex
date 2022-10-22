@@ -1,5 +1,7 @@
-import { Component } from 'react';
-import './App.css';
+import { Component } from "react";
+import CardList from "./components/card-list/card-list.component";
+import SearchBox from "./components/search-box/search-box.component";
+import "./App.css";
 
 class App extends Component {
   constructor() {
@@ -7,11 +9,12 @@ class App extends Component {
 
     this.state = {
       monsters: [],
+      searchField: "",
     };
   }
 
   componentDidMount() {
-    fetch('https://jsonplaceholder.typicode.com/users')
+    fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => response.json())
       .then((users) =>
         this.setState(() => {
@@ -19,28 +22,33 @@ class App extends Component {
         })
       );
   }
+
+  onSearchChange = (event) => {
+    const searchField = event.target.value.toLocaleLowerCase();
+    this.setState(() => {
+      return {
+        searchField,
+      };
+    });
+  };
+
   render() {
+    const { monsters, searchField } = this.state;
+    const { onSearchChange } = this;
+
+    const filteredMonsters = monsters.filter((monster) =>
+      monster.name.toLocaleLowerCase().includes(searchField)
+    );
+
     return (
       <div className="App">
-        <input
-          className="search-box"
-          type="search"
+        <h1 className="app-title">Monsters Rolodex</h1>
+        <SearchBox
+          onChangeHandler={onSearchChange}
           placeholder="Search your monsters..."
-          onChange={(event) => {
-            const substr = event.target.value;
-            this.state.monsters.filter((monster) =>
-              monster.name.contains(substr)
-            );
-            console.log(this.state.monsters);
-          }}
-        ></input>
-        {this.state.monsters.map((monster) => {
-          return (
-            <div key={monster.id}>
-              <h1>{monster.name}</h1>
-            </div>
-          );
-        })}
+          className="search-box"
+        />
+        <CardList monsters={filteredMonsters} />
         <button></button>
       </div>
     );
